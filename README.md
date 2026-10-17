@@ -9,48 +9,75 @@ app_file: app.py
 pinned: false
 ---
 
-# Age & Gender Prediction
+# FaceInsight AI — Age & Gender Prediction
 
-Predicts a person's age and gender from a photo using deep learning.
+A **Gradio-based computer vision demo** that detects a face in an uploaded image and returns an estimated age and a binary gender-classification label.
 
-## Model
+The goal of this project is to demonstrate an end-to-end deep-learning inference pipeline, from input validation and face detection through preprocessing, prediction, and interactive visualization.
 
-- **Architecture:** EfficientNetB0 (transfer learning, last 30 layers fine-tuned)
-- **Dataset:** UTKFace (~23,700 images)
-- **Tasks:** Age regression (MAE ~7-9 years) + Gender classification (~91-93% accuracy)
-- **Training:** Multi-output model with early stopping, learning rate scheduling, and age-group oversampling to improve accuracy on children and teens
+## Features
+
+- **Image upload:** submit a photograph through the Gradio interface
+- **Automatic face detection:** OpenCV Haar cascade finds the largest detected face
+- **Age prediction:** displays an estimated age in years
+- **Binary classification:** maps the model's sigmoid output to a Male/Female label
+- **Visual feedback:** draws a bounding box around the detected face
+- **Inference details:** displays the predicted-class score and timing
 
 ## How it works
 
-1. Upload any photo containing a face
-2. OpenCV detects and crops the face automatically
-3. The model predicts age and gender from the cropped face
-
-## Project structure
-
+```text
+Uploaded image
+     ↓
+OpenCV face detection (Haar cascade)
+     ↓
+Crop largest detected face and resize to 200 × 200
+     ↓
+EfficientNetB0-based multitask model
+     ├── Age regression output
+     └── Binary classification output
+     ↓
+Gradio results and annotated image
 ```
-├── app.py                          # Gradio app
-├── age_gender_prediction.ipynb     # Training notebook (Google Colab)
-├── age_gender_efficientnetb0.keras # Trained model weights
-├── requirements.txt                # Dependencies
-└── README.md
-```
+
+The inference implementation is in [`app.py`](app.py). The EfficientNetB0 model is rebuilt in code and trained weights are loaded from [`age_gender_weights.weights.h5`](age_gender_weights.weights.h5).
 
 ## Run locally
 
+Use a Python environment compatible with [`requirements.txt`](requirements.txt):
+
 ```bash
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 python app.py
 ```
 
-Then open `http://127.0.0.1:7860` in your browser.
+Gradio will print a local address (typically `http://127.0.0.1:7860`). Upload a clear image with a frontal face and select **Predict**.
 
-## Limitations
+## Repository structure
 
-- Accuracy is lower on young children (under 12) due to limited training examples in UTKFace
-- Works best on front-facing, well-lit photos
-- Face detection may fail on extreme angles or very small faces
+```text
+faceinsight-ai/
+├── app.py                         # Gradio UI, face detection and inference
+├── age_gender_weights.weights.h5  # Saved model weights
+├── requirements.txt               # Dependencies
+└── README.md                      # This documentation
+```
 
-## Tech stack
+**Note:** The model-training notebook and experimental validation logs are not included in this repository. The public app files support reviewing the inference design, but by themselves do not establish a particular test-set accuracy or mean absolute error.
 
-Python · TensorFlow · Keras · EfficientNetB0 · OpenCV · Gradio
+## Tools
+
+Python · TensorFlow / Keras · EfficientNetB0 · OpenCV · NumPy · Gradio
+
+## Important limitations
+
+- Age is an **estimate**, not a reliable measure of a person's age.
+- The classifier uses **binary training labels**; its output does **not** determine someone's gender identity.
+- The displayed class score is derived from model output, not independently demonstrated to be a calibrated probability.
+- Face detection and predictions may be less reliable with multiple faces, poor lighting, non-frontal views, occlusion, or unusual image conditions.
+- The demo selects the **largest detected face** if multiple faces are present.
+- Model performance should be communicated with a held-out evaluation before citing specific metrics.
+
+## Author
+
+**[Aqsa Mansoor](https://github.com/AqsaMansoor32)** — Data Analytics · Machine Learning · Computer Vision
